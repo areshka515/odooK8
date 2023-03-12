@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-deployment
+spec:
+  selector:
+    matchLabels:
+      app: postgres
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: main
+          image: postgres:13
+          env:
+            - name: POSTGRES_USER # secrets were created in AWS Secret Manager and extracted using aws cli to K8 secret.
+              valueFrom:
+                secretKeyRef:
+                  name: db-creds
+                  key: user
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-creds
+                  key: password
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: db-creds
+                  key: database
+          ports:
+            - containerPort: 5432

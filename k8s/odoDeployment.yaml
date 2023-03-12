@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: odoo-deployment
+spec:
+  selector:
+    matchLabels:
+      app: odoo
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: odoo
+    spec:
+      containers:
+        - name: main
+          image: odoo:16
+          env:
+            - name: POSTGRES_USER # secrets were created in AWS Secret Manager and extracted using aws cli to K8 secret.
+              valueFrom:
+                secretKeyRef:
+                  name: db-creds
+                  key: user
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-creds
+                  key: password
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: db-creds
+                  key: database
+          ports:
+            - containerPort: 8069
